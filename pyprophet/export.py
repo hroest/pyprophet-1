@@ -8,7 +8,7 @@ from .data_handling import check_sqlite_table
 from .report import plot_scores
 
 
-def export_tsv(infile, outfile, format, outcsv, transition_quantification, max_transition_pep, ipf, ipf_max_peptidoform_pep, max_rs_peakgroup_qvalue, peptide, max_global_peptide_qvalue, protein, max_global_protein_qvalue):
+def export_tsv(infile, outfile, format, outcsv, transition_quantification, max_transition_pep, ipf, ipf_max_peptidoform_pep, max_rs_peakgroup_qvalue, peptide, max_global_peptide_qvalue, protein, max_global_protein_qvalue, scores):
 
     con = sqlite3.connect(infile)
 
@@ -407,6 +407,31 @@ GROUP BY PEPTIDE_ID;
 ''', con)
         if len(data_protein_global.index) > 0:
             data = pd.merge(data, data_protein_global[data_protein_global['m_score_protein_global'] < max_global_protein_qvalue], how='inner', on=['id_peptide'])
+
+    # Append scores to output
+    if scores:
+        click.echo("Info: Append scores to features.")
+        feature_ms1 = pd.read_sql_query('''
+SELECT FEATURE.ID AS ID, FEATURE_MS1.*
+FROM FEATURE
+LEFT JOIN FEATURE_MS1 ON FEATURE_MS1.FEATURE_ID = FEATURE.ID;
+''', con)
+        ms1_scores = [c for c in feature_ms1.columns if c.startswith("VAR_")]
+        feature_ms1 = feature_ms1[['ID'] + ms1_scores]
+        feature_ms1.columns = ['ID'] + ["VAR_MS1_" + s.split("VAR_")[1] for s in ms1_scores]
+        feature_ms1.columns = [col.lower() for col in feature_ms1.columns]
+
+        feature_ms2 = pd.read_sql_query('''
+SELECT FEATURE.ID AS ID, FEATURE_MS2.*
+FROM FEATURE
+LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID;
+''', con)
+        ms2_scores = [c for c in feature_ms2.columns if c.startswith("VAR_")]
+        feature_ms2 = feature_ms2[['ID'] + ms2_scores]
+        feature_ms2.columns = ['ID'] + ["VAR_MS2_" + s.split("VAR_")[1] for s in ms2_scores]
+        feature_ms2.columns = [col.lower() for col in feature_ms2.columns]
+
+        data = pd.merge(data, pd.merge(feature_ms1, feature_ms2, how='outer', on='id'), how='outer', on=['id'])
 
     if outcsv:
         sep = ","

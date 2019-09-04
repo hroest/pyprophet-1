@@ -305,7 +305,8 @@ def backpropagate(infile, outfile, apply_scores):
 @click.option('--max_global_peptide_qvalue', default=0.01, show_default=True, type=float, help='[format: matrix/legacy] Filter results to maximum global peptide-level q-value.')
 @click.option('--protein/--no-protein', default=True, show_default=True, help='Append protein-level error-rate estimates if available.')
 @click.option('--max_global_protein_qvalue', default=0.01, show_default=True, type=float, help='[format: matrix/legacy] Filter results to maximum global protein-level q-value.')
-def export(infile, outfile, format, outcsv, transition_quantification, max_transition_pep, ipf, ipf_max_peptidoform_pep, max_rs_peakgroup_qvalue, peptide, max_global_peptide_qvalue, protein, max_global_protein_qvalue):
+@click.option('--scores/--no-scores', default=False, show_default=True, help='Append scores used by PyProphet to output.')
+def export(infile, outfile, format, outcsv, transition_quantification, max_transition_pep, ipf, ipf_max_peptidoform_pep, max_rs_peakgroup_qvalue, peptide, max_global_peptide_qvalue, protein, max_global_protein_qvalue, scores):
     """
     Export TSV/CSV tables
     """
@@ -320,7 +321,7 @@ def export(infile, outfile, format, outcsv, transition_quantification, max_trans
         else:
             outfile = outfile
 
-        export_tsv(infile, outfile, format, outcsv, transition_quantification, max_transition_pep, ipf, ipf_max_peptidoform_pep, max_rs_peakgroup_qvalue, peptide, max_global_peptide_qvalue, protein, max_global_protein_qvalue)
+        export_tsv(infile, outfile, format, outcsv, transition_quantification, max_transition_pep, ipf, ipf_max_peptidoform_pep, max_rs_peakgroup_qvalue, peptide, max_global_peptide_qvalue, protein, max_global_protein_qvalue, scores)
 
 
 # Export Compound TSV
