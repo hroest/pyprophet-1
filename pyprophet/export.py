@@ -431,7 +431,7 @@ LEFT JOIN FEATURE_MS2 ON FEATURE_MS2.FEATURE_ID = FEATURE.ID;
         feature_ms2.columns = ['ID'] + ["VAR_MS2_" + s.split("VAR_")[1] for s in ms2_scores]
         feature_ms2.columns = [col.lower() for col in feature_ms2.columns]
 
-        data = pd.merge(data, pd.merge(feature_ms1, feature_ms2, how='outer', on='id'), how='outer', on=['id'])
+        data = pd.merge(data, pd.merge(feature_ms1, feature_ms2, how='outer', on='id'), how='left', on=['id'])
 
     if outcsv:
         sep = ","
